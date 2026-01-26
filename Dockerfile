@@ -1,23 +1,27 @@
-FROM node:18-alpine
+# Development Dockerfile
+FROM node:20-alpine
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-
 # Install dependencies
-RUN npm ci --only=production
+COPY package*.json ./
+RUN npm install
 
-# Copy application files
+# Copy source
 COPY . .
 
-# Expose port
-EXPOSE 3000
+# Copy private config files
+COPY .pumbleapprc .pumbleapprc
+COPY .pumblerc /root/.pumblerc
+COPY .env .env
+COPY tokens.json tokens.json
+COPY .pumble-app-manifest.json .pumble-app-manifest.json
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+# Build TypeScript
+RUN npm run build
 
-# Start application
-CMD ["node", "server.js"]
+# Default port
+EXPOSE 8183
+
+# Use pumble-cli
+CMD ["sh", "-c", "npx pumble-cli --program ./dist/main.js --port 8183 --host ${TUNNEL_URL:-http://localhost:8183}"]
