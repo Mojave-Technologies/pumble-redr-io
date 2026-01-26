@@ -5,8 +5,10 @@
 
 /** Reads checkbox value (first selected option) */
 export function readCheckbox(state: any, blockId: string, actionId: string): boolean {
-    if(!state.values?.[blockId]?.[actionId]) return false;
-    return parseBool(state.values?.[blockId]?.[actionId].values[0]) ?? false;
+    const field = state?.values?.[blockId]?.[actionId];
+    if (!field) return false;
+    const firstValue = field?.selected_options?.[0]?.value ?? field?.values?.[0]?.value ?? field?.value;
+    return parseBool(firstValue) ?? false;
 }
 
 /** Reads date picker value, returns ISO string with end-of-day time */
@@ -33,7 +35,9 @@ export function readStaticSelect(state: any, blockId: string, actionId: string):
     return field?.selected_option?.value ?? field?.selectedOption?.value ?? field?.value ?? undefined;
 }
 
-function parseBool(value: string | boolean): boolean | undefined {
+function parseBool(value: string | boolean | undefined | null): boolean | undefined {
+    if (value === undefined || value === null) return undefined;
     if (typeof value === 'boolean') return value;
-    return value.trim().toLowerCase() === 'true';
+    if (typeof value === 'string') return value.trim().toLowerCase() === 'true';
+    return undefined;
 }
