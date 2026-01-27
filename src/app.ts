@@ -30,7 +30,7 @@ export function createApp(config: AppConfig, folderCache: FolderCache, domainCac
     const domains = domainCache.getDomains();
     const app: App = {
         tokenStore: new JsonFileTokenStore(config.pumbleTokenStorePath),
-        welcomeMessage: 'Hello! REDR app is ready to shorten URLs.',
+        welcomeMessage: 'Secure link shortening and sharing made simple. Sign up free at www.REDR.io.',
         offlineMessage: 'REDR URL Shortener is temporarily unavailable. Please try again later.',
         redirect: { enable: true },
 
