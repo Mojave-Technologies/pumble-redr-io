@@ -31,7 +31,7 @@ export function createApp(config: AppConfig, folderCache: FolderCache, domainCac
     const app: App = {
         tokenStore: new JsonFileTokenStore(config.pumbleTokenStorePath),
         welcomeMessage: 'Hello! REDR app is ready to shorten URLs.',
-        offlineMessage: 'Service is temporarily unavailable. Please try again.',
+        offlineMessage: 'REDR URL Shortener is temporarily unavailable. Please try again later.',
         redirect: { enable: true },
 
         slashCommands: [
