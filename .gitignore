@@ -33,3 +33,7 @@ npm-debug.log*
 
 # Test coverage
 coverage/
+
+# SSH keys
+*.pem
+*.ppk
