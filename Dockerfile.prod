@@ -1,0 +1,25 @@
+# Production Dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy source and build
+COPY tsconfig.json ./
+COPY src ./src
+RUN npm install typescript --save-dev && npm run build && npm remove typescript
+
+# Copy manifest (required by pumble-sdk)
+COPY manifest.json ./
+
+# Clean up dev files
+RUN rm -rf src tsconfig.json
+
+# Default port
+EXPOSE 8183
+
+# Run directly with node (not pumble-cli)
+CMD ["node", "dist/main.js"]

@@ -1,0 +1,17 @@
+{
+    "name": "pumble_redr_io",
+    "displayName": "REDR",
+    "bot": true,
+    "botTitle": "Shorten links via REDR.io - URL Shortener",
+    "socketMode": false,
+    "scopes": {
+        "botScopes": ["messages:read", "messages:write"],
+        "userScopes": ["messages:read", "messages:write"]
+    },
+    "eventSubscriptions": {
+        "url": "/hook",
+        "events": ["NEW_MESSAGE"]
+    },
+    "welcomeMessage": "Hello! REDR app is ready to shorten URLs.",
+    "offlineMessage": "REDR URL Shortener is temporarily unavailable. Please try again later."
+}

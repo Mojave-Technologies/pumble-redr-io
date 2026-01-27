@@ -1,421 +1,269 @@
-# Deployment Guide
+# Deployment Guide — Oracle Cloud
 
-This guide covers deploying your Pumble URL Shortener to various platforms.
+Step-by-step instructions for deploying Pumble REDR bot on Oracle Cloud Infrastructure.
 
-## Table of Contents
-- [Railway](#railway)
-- [Render](#render)
-- [Heroku](#heroku)
-- [AWS (EC2)](#aws-ec2)
-- [Docker](#docker)
-- [Vercel](#vercel)
+## Prerequisites
 
----
-
-## Railway
-
-Railway is recommended for quick deployment with minimal configuration.
-
-### Steps:
-
-1. **Install Railway CLI:**
-   ```bash
-   npm install -g @railway/cli
-   ```
-
-2. **Login:**
-   ```bash
-   railway login
-   ```
-
-3. **Initialize Project:**
-   ```bash
-   railway init
-   ```
-
-4. **Set Environment Variables:**
-   ```bash
-   railway variables set PUMBLE_SIGNING_SECRET=your_secret
-   railway variables set URL_SHORTENER_API=your_api_url
-   railway variables set URL_SHORTENER_API_KEY=your_api_key
-   ```
-
-5. **Deploy:**
-   ```bash
-   railway up
-   ```
-
-6. **Get Domain:**
-   ```bash
-   railway domain
-   ```
-
-Update your Pumble app's Request URL with the Railway domain.
+- Oracle Cloud instance (Ubuntu 22.04 or Oracle Linux 8/9 recommended)
+- External IP assigned to the instance
+- SSH access to the instance
+- Pumble App credentials (App ID, Client Secret, Signing Secret, App Key)
+- REDR API key
 
 ---
 
-## Render
-
-### Steps:
-
-1. **Push to GitHub:**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git remote add origin your-repo-url
-   git push -u origin main
-   ```
-
-2. **Create Web Service:**
-   - Go to [Render Dashboard](https://dashboard.render.com)
-   - Click "New +" → "Web Service"
-   - Connect your GitHub repository
-   - Configure:
-     - **Name**: pumble-url-shortener
-     - **Environment**: Node
-     - **Build Command**: `npm install`
-     - **Start Command**: `npm start`
-
-3. **Add Environment Variables:**
-   - Go to "Environment" tab
-   - Add:
-     - `PUMBLE_SIGNING_SECRET`
-     - `URL_SHORTENER_API`
-     - `URL_SHORTENER_API_KEY`
-
-4. **Deploy:**
-   - Click "Create Web Service"
-   - Wait for deployment to complete
-
-5. **Get URL:**
-   - Copy your Render URL (e.g., `https://pumble-url-shortener.onrender.com`)
-   - Update Pumble app's Request URL
-
----
-
-## Heroku
-
-### Steps:
-
-1. **Install Heroku CLI:**
-   ```bash
-   npm install -g heroku
-   ```
-
-2. **Login:**
-   ```bash
-   heroku login
-   ```
-
-3. **Create App:**
-   ```bash
-   heroku create pumble-url-shortener
-   ```
-
-4. **Set Environment Variables:**
-   ```bash
-   heroku config:set PUMBLE_SIGNING_SECRET=your_secret
-   heroku config:set URL_SHORTENER_API=your_api_url
-   heroku config:set URL_SHORTENER_API_KEY=your_api_key
-   ```
-
-5. **Deploy:**
-   ```bash
-   git push heroku main
-   ```
-
-6. **Open App:**
-   ```bash
-   heroku open
-   ```
-
-7. **View Logs:**
-   ```bash
-   heroku logs --tail
-   ```
-
----
-
-## AWS EC2
-
-### Steps:
-
-1. **Launch EC2 Instance:**
-   - Amazon Linux 2 or Ubuntu 22.04
-   - t2.micro (free tier eligible)
-   - Security Group: Allow ports 22 (SSH), 80 (HTTP), 443 (HTTPS)
-
-2. **Connect to Instance:**
-   ```bash
-   ssh -i your-key.pem ec2-user@your-instance-ip
-   ```
-
-3. **Install Node.js:**
-   ```bash
-   curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -
-   sudo yum install -y nodejs
-   ```
-
-4. **Install PM2:**
-   ```bash
-   sudo npm install -g pm2
-   ```
-
-5. **Clone Repository:**
-   ```bash
-   git clone your-repo-url
-   cd pumble-url-shortener
-   ```
-
-6. **Install Dependencies:**
-   ```bash
-   npm install
-   ```
-
-7. **Create .env File:**
-   ```bash
-   nano .env
-   # Add your environment variables
-   ```
-
-8. **Start with PM2:**
-   ```bash
-   pm2 start server.js --name pumble-shortener
-   pm2 startup
-   pm2 save
-   ```
-
-9. **Setup Nginx (Optional):**
-   ```bash
-   sudo yum install -y nginx
-   sudo nano /etc/nginx/conf.d/pumble.conf
-   ```
-   
-   Add:
-   ```nginx
-   server {
-       listen 80;
-       server_name your-domain.com;
-
-       location / {
-           proxy_pass http://localhost:3000;
-           proxy_http_version 1.1;
-           proxy_set_header Upgrade $http_upgrade;
-           proxy_set_header Connection 'upgrade';
-           proxy_set_header Host $host;
-           proxy_cache_bypass $http_upgrade;
-       }
-   }
-   ```
-
-10. **Start Nginx:**
-    ```bash
-    sudo systemctl start nginx
-    sudo systemctl enable nginx
-    ```
-
----
-
-## Docker
-
-### Local Development:
+## 1. Connect to Instance
 
 ```bash
-docker-compose up
-```
-
-### Production Deployment:
-
-1. **Build Image:**
-   ```bash
-   docker build -t pumble-url-shortener .
-   ```
-
-2. **Run Container:**
-   ```bash
-   docker run -d \
-     -p 3000:3000 \
-     -e PUMBLE_SIGNING_SECRET=your_secret \
-     -e URL_SHORTENER_API=your_api_url \
-     -e URL_SHORTENER_API_KEY=your_api_key \
-     --name pumble-shortener \
-     pumble-url-shortener
-   ```
-
-3. **Push to Registry (Optional):**
-   ```bash
-   docker tag pumble-url-shortener your-registry/pumble-url-shortener
-   docker push your-registry/pumble-url-shortener
-   ```
-
-### Docker Swarm:
-
-```bash
-docker stack deploy -c docker-compose.yml pumble
+ssh opc@<your-instance-ip>
+# or for Ubuntu:
+ssh ubuntu@<your-instance-ip>
 ```
 
 ---
 
-## Vercel
+## 2. Install Docker
 
-Note: Vercel is designed for serverless functions, so requires modification.
+### For Oracle Linux 8/9:
 
-### Steps:
+```bash
+# Install Docker
+sudo dnf install -y dnf-utils
+sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
-1. **Create `api/shorten.js`:**
-   ```javascript
-   const crypto = require('crypto');
-   const axios = require('axios');
+# Start and enable Docker
+sudo systemctl start docker
+sudo systemctl enable docker
 
-   module.exports = async (req, res) => {
-       if (req.method !== 'POST') {
-           return res.status(405).json({ error: 'Method not allowed' });
-       }
+# Add current user to docker group (logout/login required after)
+sudo usermod -aG docker $USER
+```
 
-       // Copy your slash command logic here
-       // Adjust for serverless environment
-   };
-   ```
+### For Ubuntu 22.04:
 
-2. **Create `vercel.json`:**
-   ```json
-   {
-       "version": 2,
-       "builds": [
-           {
-               "src": "api/**/*.js",
-               "use": "@vercel/node"
-           }
-       ],
-       "routes": [
-           {
-               "src": "/slash/shorten",
-               "dest": "/api/shorten.js"
-           }
-       ]
-   }
-   ```
+```bash
+# Install Docker
+sudo apt update
+sudo apt install -y ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
-3. **Deploy:**
-   ```bash
-   npm install -g vercel
-   vercel login
-   vercel
-   ```
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+# Add current user to docker group
+sudo usermod -aG docker $USER
+```
+
+**Important:** Log out and log back in after adding user to docker group.
+
+### Verify Docker installation:
+
+```bash
+docker --version
+docker compose version
+```
 
 ---
 
-## Post-Deployment Checklist
+## 3. Open Firewall Port
 
-After deploying to any platform:
+### Oracle Cloud Console (required):
 
-- [ ] Copy your deployment URL
-- [ ] Update Pumble app's Request URL in Developer Portal
-- [ ] Test the `/shorten` command in Pumble
-- [ ] Check application logs for errors
-- [ ] Verify signature verification is working
-- [ ] Test with various URLs
-- [ ] Set up monitoring/alerts
-- [ ] Configure SSL/HTTPS (most platforms do this automatically)
+1. Go to **Networking → Virtual Cloud Networks**
+2. Select your VCN → **Security Lists**
+3. Add **Ingress Rule**:
+   - Source CIDR: `0.0.0.0/0`
+   - Destination Port: `8183`
+   - Protocol: TCP
+
+### Instance firewall (Oracle Linux):
+
+```bash
+sudo firewall-cmd --permanent --add-port=8183/tcp
+sudo firewall-cmd --reload
+```
+
+### Instance firewall (Ubuntu):
+
+```bash
+sudo ufw allow 8183/tcp
+```
 
 ---
 
-## Monitoring & Logs
+## 4. Clone Repository
 
-### Railway:
 ```bash
-railway logs
+cd ~
+git clone <repository-url> pumble-redr-io
+cd pumble-redr-io
 ```
 
-### Render:
-- View logs in dashboard under "Logs" tab
+---
 
-### Heroku:
+## 5. Configure Environment
+
 ```bash
-heroku logs --tail
+cp .env.example .env
+nano .env  # or vim .env
 ```
 
-### PM2 (EC2):
-```bash
-pm2 logs pumble-shortener
-pm2 monit
+Fill in your credentials (see `.env.example` for all options):
+
+```env
+# Pumble App Credentials
+# Get these from .pumbleapprc file (created during local dev setup)
+# Or from Pumble Developer Portal
+PUMBLE_APP_ID=your_app_id
+PUMBLE_APP_CLIENT_SECRET=your_client_secret
+PUMBLE_APP_SIGNING_SECRET=your_signing_secret
+PUMBLE_APP_KEY=your_app_key
+
+# IMPORTANT: Your server's external URL (where Pumble sends webhooks)
+ADDON_HOST=http://<your-instance-ip>:8183
+
+# REDR API
+REDR_API_URL=https://redr.io/api/links
+REDR_API_KEY=your_redr_api_key
+REDR_DOMAIN_ID=your_domain_id
+REDR_FOLDER_NAME=pumble
+
+# Server port
+PUMBLE_ADDON_PORT=8183
 ```
 
-### Docker:
+**Important:** 
+- `ADDON_HOST` must match your server's external IP — this is the URL Pumble will use to send webhooks
+- `PUMBLE_ADDON_PORT` is the port the app listens on (default: 5000)
+
+---
+
+## 6. Update Pumble App Manifest URL
+
+In **Pumble Developer Portal**, update your app's manifest URL to:
+
+```
+http://<your-instance-ip>:8183/manifest
+```
+
+---
+
+## 7. Build and Run
+
 ```bash
-docker logs -f pumble-shortener
+# Create empty tokens file (for OAuth token persistence)
+touch tokens.json
+
+# Build the image
+docker compose -f docker-compose.prod.yml build
+
+# Start the container (detached)
+docker compose -f docker-compose.prod.yml up -d
+```
+
+---
+
+## 8. Verify Deployment
+
+### Check container is running:
+
+```bash
+docker compose -f docker-compose.prod.yml ps
+```
+
+Expected output:
+```
+NAME                IMAGE               STATUS
+pumble-redr-app     pumble-redr-io      Up 2 minutes
+```
+
+### Check logs:
+
+```bash
+docker compose -f docker-compose.prod.yml logs -f
+```
+
+### Test manifest endpoint:
+
+```bash
+curl http://localhost:8183/manifest
+```
+
+Or from your machine:
+```bash
+curl http://<your-instance-ip>:8183/manifest
+```
+
+---
+
+## 9. Register App in Pumble (Important!)
+
+Since this is a new deployment with a different URL than development:
+
+1. Go to **Pumble Developer Portal**: https://developer.marketplace.cake.com
+2. Select your app
+3. Update the **Manifest URL** to: `http://<your-instance-ip>:8183/manifest`
+4. Click **Save**
+5. Go to your Pumble workspace
+6. **Reinstall/Re-authorize** the app
+
+This step is **required** — Pumble needs to know the new webhook URL to send events to your production server.
+
+The app will create a new `tokens.json` file on first authorization.
+
+---
+
+## Maintenance Commands
+
+```bash
+# View logs
+docker compose -f docker-compose.prod.yml logs -f
+
+# Restart
+docker compose -f docker-compose.prod.yml restart
+
+# Stop
+docker compose -f docker-compose.prod.yml down
+
+# Update and redeploy
+git pull
+docker compose -f docker-compose.prod.yml build
+docker compose -f docker-compose.prod.yml up -d
 ```
 
 ---
 
 ## Troubleshooting
 
-### Common Issues:
+### Container won't start
 
-1. **Port Already in Use:**
-   ```bash
-   # Find process using port 3000
-   lsof -i :3000
-   # Kill process
-   kill -9 PID
-   ```
+```bash
+docker compose -f docker-compose.prod.yml logs
+```
 
-2. **Environment Variables Not Loading:**
-   - Verify `.env` file exists
-   - Check file permissions
-   - Restart application
+Check for missing environment variables or invalid credentials.
 
-3. **Signature Verification Fails:**
-   - Check signing secret matches Pumble
-   - Verify timestamp is within 5 minutes
+### Can't reach manifest URL
 
-4. **External Access Issues:**
-   - Check firewall rules
-   - Verify security group settings (AWS)
-   - Ensure correct port is exposed
+1. Verify security list in Oracle Cloud Console has port 8183 open
+2. Check instance firewall: `sudo firewall-cmd --list-ports`
+3. Verify container is running: `docker compose -f docker-compose.prod.yml ps`
+
+### Bot not responding in Pumble
+
+1. Check manifest URL is correct in Pumble Developer Portal
+2. Verify app is authorized/installed
+3. Check container logs for errors: `docker compose -f docker-compose.prod.yml logs -f`
 
 ---
 
-## Scaling Considerations
+## Security Notes
 
-For high-traffic deployments:
-
-1. **Use Load Balancer:**
-   - AWS ALB
-   - Nginx upstream
-   - Railway auto-scaling
-
-2. **Enable Caching:**
-   - Redis for frequently shortened URLs
-   - CDN for static assets
-
-3. **Database for Persistence:**
-   - MongoDB for URL mapping
-   - PostgreSQL for analytics
-
-4. **Rate Limiting:**
-   - Implement per-user rate limits
-   - Use Redis for distributed rate limiting
-
----
-
-## Security Hardening
-
-1. **HTTPS Only:**
-   - Use Let's Encrypt for SSL
-   - Enforce HTTPS redirects
-
-2. **Environment Security:**
-   - Never commit `.env` to git
-   - Use secret management services
-   - Rotate API keys regularly
-
-3. **Request Validation:**
-   - Already implemented signature verification
-   - Add IP whitelisting if needed
-   - Implement rate limiting
-
----
-
-Need help? Contact Mojave Technologies support.
+- For production, consider adding HTTPS via reverse proxy (nginx + Let's Encrypt)
+- Keep `.env` file secure and never commit to git
+- Regularly update Docker images: `docker compose pull && docker compose up -d`

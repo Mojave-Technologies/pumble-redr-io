@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    ports:
+      - "8183:8183"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    volumes:
+      # Persist OAuth tokens across container restarts
+      - ./tokens.json:/app/tokens.json
+    restart: unless-stopped
