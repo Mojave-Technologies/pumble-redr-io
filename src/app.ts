@@ -238,7 +238,7 @@ export function createApp(config: AppConfig, folderCache: FolderCache, domainCac
                             client,
                             fields: { longUrl, masked: false },
                             onSuccess: async (shortUrl) => {
-                                await ctx.say({ text: `Shortened: ${shortUrl}` }, 'in_channel', true);
+                                await ctx.say({ text: `${shortUrl}` }, 'in_channel', true);
                             },
                         });
                     } catch (error) {

@@ -13,5 +13,5 @@
         "events": ["NEW_MESSAGE"]
     },
     "welcomeMessage": "Hello! REDR app is ready to shorten URLs.",
-    "offlineMessage": "Secure link shortening and sharing made simple. Sign up free at www.REDR.io."
+    "offlineMessage": "REDR URL Shortener is temporarily unavailable. Please try again later."
 }
