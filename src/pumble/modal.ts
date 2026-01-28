@@ -22,6 +22,7 @@ interface ShortUrlModalParams {
  * Returns success view if shortUrl is provided, otherwise returns input form.
  */
 export function buildShortUrlModal({ initialUrl, errors, shortUrl, loading, domains, selectedDomainId }: ShortUrlModalParams): V1.View<'MODAL'> {
+    console.log(`[Modal] Building modal with ${domains?.length || 0} domains`);
     if (shortUrl) {
         return {
             type: 'MODAL',
