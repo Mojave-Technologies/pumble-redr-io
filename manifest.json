@@ -1,8 +1,8 @@
 {
-    "name": "pumble_redr_io",
+    "name": "REDR.io (Pumble)",
     "displayName": "REDR.io (Pumble)",
     "bot": true,
-    "botTitle": "Shorten links via REDR.io - URL Shortener",
+    "botTitle": "REDR.io (Pumble)",
     "socketMode": false,
     "scopes": {
         "botScopes": ["messages:read", "messages:write"],
