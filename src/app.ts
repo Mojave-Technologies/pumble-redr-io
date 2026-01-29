@@ -261,9 +261,21 @@ export function createApp(config: AppConfig, folderCache: FolderCache, domainCac
 }
 
 function getErrorMessage(error: unknown): string {
-    if (error instanceof Error) return error.message;
+    if (error instanceof Error) {
+        // Make API errors more user-friendly
+        if (error.name === 'ApiError' && error.message.includes('HTTP 500')) {
+            return 'REDR service is temporarily unavailable. Please try again later.';
+        }
+        if (error.name === 'ApiError' && error.message.includes('HTTP 4')) {
+            return 'Invalid request. Please check your URL and try again.';
+        }
+        if (error.name === 'NetworkError' || error.name === 'TimeoutError') {
+            return 'Could not connect to REDR service. Please try again later.';
+        }
+        return error.message;
+    }
     if (typeof error === 'string') return error;
-    return 'unknown error';
+    return 'Unknown error occurred.';
 }
 
 function validateShortUrlModalState(state: unknown): {
