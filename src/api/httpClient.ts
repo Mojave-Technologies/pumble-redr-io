@@ -3,10 +3,19 @@
  * Uses keep-alive connections and handles network errors.
  */
 
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import http from 'http';
 import https from 'https';
 import { NetworkError, TimeoutError } from './helpers';
+
+/**
+ * Minimal HTTP client interface required by API functions.
+ * Allows easier testing with mock clients.
+ */
+export interface HttpClient {
+    get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>>;
+    post<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<AxiosResponse<T>>;
+}
 
 export interface RedrHttpClient extends AxiosInstance {
     /** Cleanup method to close keep-alive connections on shutdown */

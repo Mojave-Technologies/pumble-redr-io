@@ -13,20 +13,21 @@ import {
     SlashCommandContext,
     ViewActionContext,
 } from 'pumble-sdk/lib/core/types/contexts';
-import { AxiosInstance } from 'axios';
+import type { Request, Response } from 'express';
+import { HttpClient } from './api/httpClient';
 import { AppConfig } from './config/env';
 import { FolderCache } from './cache/folderCache';
 import { DomainCache } from './cache/domainCache';
 import { extractFirstUrl, normalizeHttpUrl } from './utils/url';
 import { runShortenFlow } from './redr/shortenFlow';
 import { buildShortUrlModal } from './pumble/modal';
-import { readCheckbox, readInput, readDatepicker, readStaticSelect } from './pumble/stateReaders';
+import { readCheckbox, readInput, readDatepicker, readStaticSelect, ModalViewState } from './pumble/stateReaders';
 import { deliver } from './pumble/deliver';
 
 type ModalFieldErrors = Record<string, string>;
 
 /** Creates the Pumble app with all handlers configured */
-export function createApp(config: AppConfig, folderCache: FolderCache, domainCache: DomainCache, client: AxiosInstance): App {
+export function createApp(config: AppConfig, folderCache: FolderCache, domainCache: DomainCache, client: HttpClient): App {
     const domains = domainCache.getDomains();
     const app: App = {
         tokenStore: new JsonFileTokenStore(config.pumbleTokenStorePath),
@@ -251,7 +252,7 @@ export function createApp(config: AppConfig, folderCache: FolderCache, domainCac
 
         // Health check endpoint for ALB
         onServerConfiguring: (expressApp) => {
-            expressApp.get('/health', (_req: any, res: any) => {
+            expressApp.get('/health', (_req: Request, res: Response) => {
                 res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
             });
         },
@@ -261,12 +262,24 @@ export function createApp(config: AppConfig, folderCache: FolderCache, domainCac
 }
 
 function getErrorMessage(error: unknown): string {
-    if (error instanceof Error) return error.message;
+    if (error instanceof Error) {
+        // Make API errors more user-friendly
+        if (error.name === 'ApiError' && error.message.includes('HTTP 500')) {
+            return 'REDR service is temporarily unavailable. Please try again later.';
+        }
+        if (error.name === 'ApiError' && error.message.includes('HTTP 4')) {
+            return 'Invalid request. Please check your URL and try again.';
+        }
+        if (error.name === 'NetworkError' || error.name === 'TimeoutError') {
+            return 'Could not connect to REDR service. Please try again later.';
+        }
+        return error.message;
+    }
     if (typeof error === 'string') return error;
-    return 'unknown error';
+    return 'Unknown error occurred.';
 }
 
-function validateShortUrlModalState(state: unknown): {
+function validateShortUrlModalState(state: ModalViewState): {
     fields?: { longUrl: string; masked: boolean; expiresAt?: string; password?: string };
     errors?: ModalFieldErrors;
 } {

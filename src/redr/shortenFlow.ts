@@ -3,8 +3,8 @@
  * Resolves folder, creates short URL, and calls success callback.
  */
 
-import { AxiosInstance } from 'axios';
 import { randomUUID } from 'crypto';
+import { HttpClient } from '../api/httpClient';
 import { AppConfig } from '../config/env';
 import { FolderCache } from '../cache/folderCache';
 import { ShortenUrlFields, shortenUrl } from './urlService';
@@ -12,7 +12,7 @@ import { ShortenUrlFields, shortenUrl } from './urlService';
 interface ShortenFlowParams {
     config: AppConfig;
     cache: FolderCache;
-    client: AxiosInstance;
+    client: HttpClient;
     fields: ShortenUrlFields;
     domainId?: string;  // Optional override for default domain
     onSuccess(shortUrl: string, context: { requestId: string }): Promise<void>;

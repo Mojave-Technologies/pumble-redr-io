@@ -7,14 +7,21 @@
     "build": "tsc",
     "dev": "npx pumble-cli --program ./dist/main.js",
     "dev:debug": "npx pumble-cli --program ./dist/main.js --inspect 0.0.0.0:9229 --debug",
-    "start": "node ./dist/main.js"
+    "start": "node ./dist/main.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
     "@types/node": "^25.0.10",
+    "jest": "^29.7.0",
     "pumble-cli": "^1.0.0",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.9.3"
   },
   "dependencies": {
