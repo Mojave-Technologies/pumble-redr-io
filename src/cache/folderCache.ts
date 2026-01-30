@@ -80,9 +80,23 @@ function shouldRetryCreateFolder(error: unknown): boolean {
     return getErrorMessage(error).toLowerCase().includes('already exists');
 }
 
+/** Error object that may contain HTTP status information */
+interface ErrorWithStatus {
+    status?: number | string;
+    response?: {
+        status?: number | string;
+    };
+}
+
+/** Type guard to check if error has status-like properties */
+function isErrorWithStatus(error: unknown): error is ErrorWithStatus {
+    return typeof error === 'object' && error !== null;
+}
+
 function isHttpStatus(error: unknown, expected: number): boolean {
-    if (typeof error !== 'object' || error === null) return false;
-    const responseStatus = (error as any)?.response?.status ?? (error as any)?.status;
+    if (!isErrorWithStatus(error)) return false;
+    
+    const responseStatus = error.response?.status ?? error.status;
     if (typeof responseStatus === 'number') return responseStatus === expected;
     if (typeof responseStatus === 'string') {
         const numeric = Number(responseStatus);

@@ -6,39 +6,69 @@
 import { AxiosInstance, AxiosResponse } from 'axios';
 import { assertOkResponse, ValidationError } from '../helpers';
 
-interface FolderInfo {
+/** Folder information from REDR API */
+export interface FolderInfo {
     id: string;
     name: string;
 }
 
+/** Domain information from REDR API */
 export interface DomainInfo {
     id: string;
     url: string;
 }
 
+/** Raw folder item from API response */
+interface ApiFolderItem {
+    id?: string | number;
+    name?: string;
+}
+
+/** Raw domain item from API response */
+interface ApiDomainItem {
+    id?: string | number;
+    url?: string;
+}
+
+/** Safely converts API item to FolderInfo */
+function toFolderInfo(item: ApiFolderItem): FolderInfo {
+    return {
+        id: String(item?.id ?? ''),
+        name: String(item?.name ?? ''),
+    };
+}
+
+/** Safely converts API item to DomainInfo */
+function toDomainInfo(item: ApiDomainItem): DomainInfo {
+    return {
+        id: String(item?.id ?? ''),
+        url: String(item?.url ?? ''),
+    };
+}
+
 /** Fetches all folders from REDR API */
 export async function listFolders(client: AxiosInstance, foldersUrl: string): Promise<FolderInfo[]> {
-    const response: AxiosResponse = await client.get(foldersUrl);
+    const response: AxiosResponse<ApiFolderItem[] | unknown> = await client.get(foldersUrl);
 
     assertOkResponse(response, 'folders');
 
     if (!Array.isArray(response.data)) return [];
 
-    return response.data
-        .map((folderItem: any) => ({ id: String(folderItem?.id || ''), name: String(folderItem?.name || '') }))
-        .filter((folderItem) => folderItem.id && folderItem.name);
+    return (response.data as ApiFolderItem[])
+        .map(toFolderInfo)
+        .filter((item) => item.id && item.name);
 }
 
 /** Fetches all available domains for URL shortening */
 export async function listDomains(client: AxiosInstance, domainsUrl: string): Promise<DomainInfo[]> {
-    const response: AxiosResponse = await client.get(domainsUrl);
+    const response: AxiosResponse<ApiDomainItem[] | unknown> = await client.get(domainsUrl);
 
     assertOkResponse(response, 'domains');
 
     if (!Array.isArray(response.data)) return [];
 
-    return response.data
-        .map((item: any) => ({ id: String(item?.id || ''), url: String(item?.url || '') }))
+    return (response.data as ApiDomainItem[])
+        .map(toDomainInfo)
         .filter((item) => item.id && item.url);
 }
 

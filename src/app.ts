@@ -13,6 +13,7 @@ import {
     SlashCommandContext,
     ViewActionContext,
 } from 'pumble-sdk/lib/core/types/contexts';
+import type { Request, Response } from 'express';
 import { AxiosInstance } from 'axios';
 import { AppConfig } from './config/env';
 import { FolderCache } from './cache/folderCache';
@@ -20,7 +21,7 @@ import { DomainCache } from './cache/domainCache';
 import { extractFirstUrl, normalizeHttpUrl } from './utils/url';
 import { runShortenFlow } from './redr/shortenFlow';
 import { buildShortUrlModal } from './pumble/modal';
-import { readCheckbox, readInput, readDatepicker, readStaticSelect } from './pumble/stateReaders';
+import { readCheckbox, readInput, readDatepicker, readStaticSelect, ModalViewState } from './pumble/stateReaders';
 import { deliver } from './pumble/deliver';
 
 type ModalFieldErrors = Record<string, string>;
@@ -251,7 +252,7 @@ export function createApp(config: AppConfig, folderCache: FolderCache, domainCac
 
         // Health check endpoint for ALB
         onServerConfiguring: (expressApp) => {
-            expressApp.get('/health', (_req: any, res: any) => {
+            expressApp.get('/health', (_req: Request, res: Response) => {
                 res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
             });
         },
@@ -278,7 +279,7 @@ function getErrorMessage(error: unknown): string {
     return 'Unknown error occurred.';
 }
 
-function validateShortUrlModalState(state: unknown): {
+function validateShortUrlModalState(state: ModalViewState): {
     fields?: { longUrl: string; masked: boolean; expiresAt?: string; password?: string };
     errors?: ModalFieldErrors;
 } {
