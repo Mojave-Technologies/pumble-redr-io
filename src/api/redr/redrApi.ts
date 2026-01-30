@@ -3,8 +3,9 @@
  * Low-level HTTP calls for folders, domains, and URL shortening.
  */
 
-import { AxiosInstance, AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 import { assertOkResponse, ValidationError } from '../helpers';
+import { HttpClient } from '../httpClient';
 
 /** Folder information from REDR API */
 export interface FolderInfo {
@@ -47,7 +48,7 @@ function toDomainInfo(item: ApiDomainItem): DomainInfo {
 }
 
 /** Fetches all folders from REDR API */
-export async function listFolders(client: AxiosInstance, foldersUrl: string): Promise<FolderInfo[]> {
+export async function listFolders(client: HttpClient, foldersUrl: string): Promise<FolderInfo[]> {
     const response: AxiosResponse<ApiFolderItem[] | unknown> = await client.get(foldersUrl);
 
     assertOkResponse(response, 'folders');
@@ -60,7 +61,7 @@ export async function listFolders(client: AxiosInstance, foldersUrl: string): Pr
 }
 
 /** Fetches all available domains for URL shortening */
-export async function listDomains(client: AxiosInstance, domainsUrl: string): Promise<DomainInfo[]> {
+export async function listDomains(client: HttpClient, domainsUrl: string): Promise<DomainInfo[]> {
     const response: AxiosResponse<ApiDomainItem[] | unknown> = await client.get(domainsUrl);
 
     assertOkResponse(response, 'domains');
@@ -73,7 +74,7 @@ export async function listDomains(client: AxiosInstance, domainsUrl: string): Pr
 }
 
 /** Creates a new folder, returns folder ID */
-export async function createFolder(client: AxiosInstance, foldersUrl: string, folderName: string): Promise<string> {
+export async function createFolder(client: HttpClient, foldersUrl: string, folderName: string): Promise<string> {
     const response: AxiosResponse = await client.post(
         foldersUrl,
         { name: folderName },
@@ -92,7 +93,7 @@ export async function createFolder(client: AxiosInstance, foldersUrl: string, fo
 
 /** Creates a shortened URL, returns the short URL string */
 export async function createShortUrl(
-    client: AxiosInstance,
+    client: HttpClient,
     apiUrl: string,
     requestBody: Record<string, unknown>
 ): Promise<string> {

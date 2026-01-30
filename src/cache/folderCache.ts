@@ -3,7 +3,7 @@
  * Finds or creates folder on first request, then caches the ID.
  */
 
-import { AxiosInstance } from 'axios';
+import { HttpClient } from '../api/httpClient';
 import { type AppConfig } from '../config/env';
 import { normalizeLowerTrim, ApiError } from '../api/helpers';
 import { listFolders, createFolder } from '../api/redr/redrApi';
@@ -14,7 +14,7 @@ export class InMemoryFolderCache {
 
     constructor(
         private readonly config: Pick<AppConfig, 'redrFolderId'>,
-        private readonly client: AxiosInstance,
+        private readonly client: HttpClient,
         private readonly foldersUrl: string
     ) {}
 

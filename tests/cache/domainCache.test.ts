@@ -1,5 +1,6 @@
 import { DomainCache } from '../../src/cache/domainCache';
 import * as redrApi from '../../src/api/redr/redrApi';
+import { emptyMockClient, MockHttpClient } from '../types';
 
 // Mock the redrApi module
 jest.mock('../../src/api/redr/redrApi');
@@ -16,7 +17,7 @@ afterAll(() => {
 });
 
 describe('DomainCache', () => {
-    const mockClient = {} as any;
+    const mockClient: MockHttpClient = emptyMockClient;
     const domainsUrl = 'https://rdr.im/api/domains';
 
     beforeEach(() => {

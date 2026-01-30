@@ -1,5 +1,6 @@
 import { shortenUrl, ShortenUrlFields } from '../../src/redr/urlService';
 import * as redrApi from '../../src/api/redr/redrApi';
+import { emptyMockClient, MockHttpClient } from '../types';
 
 // Mock the redrApi module
 jest.mock('../../src/api/redr/redrApi');
@@ -7,7 +8,7 @@ jest.mock('../../src/api/redr/redrApi');
 const mockedCreateShortUrl = redrApi.createShortUrl as jest.MockedFunction<typeof redrApi.createShortUrl>;
 
 describe('urlService', () => {
-    const mockClient = {} as any;
+    const mockClient: MockHttpClient = emptyMockClient;
     const apiUrl = 'https://rdr.im/api/urls';
     const domainId = 'domain123';
     const folderId = 'folder456';

@@ -1,6 +1,8 @@
 import { InMemoryFolderCache } from '../../src/cache/folderCache';
 import * as redrApi from '../../src/api/redr/redrApi';
 import { ApiError } from '../../src/api/helpers';
+import { emptyMockClient, MockHttpClient } from '../types';
+import { FolderInfo } from '../../src/api/redr/redrApi';
 
 // Mock the redrApi module
 jest.mock('../../src/api/redr/redrApi');
@@ -9,7 +11,7 @@ const mockedListFolders = redrApi.listFolders as jest.MockedFunction<typeof redr
 const mockedCreateFolder = redrApi.createFolder as jest.MockedFunction<typeof redrApi.createFolder>;
 
 describe('InMemoryFolderCache', () => {
-    const mockClient = {} as any;
+    const mockClient: MockHttpClient = emptyMockClient;
     const foldersUrl = 'https://rdr.im/api/folders';
     const folderName = 'pumble-redr';
 
@@ -102,12 +104,12 @@ describe('InMemoryFolderCache', () => {
         it('should deduplicate concurrent requests', async () => {
             const config = { redrFolderId: undefined };
             
-            let resolveList: (value: any) => void;
-            const listPromise = new Promise((resolve) => {
+            let resolveList: (value: FolderInfo[]) => void;
+            const listPromise = new Promise<FolderInfo[]>((resolve) => {
                 resolveList = resolve;
             });
             
-            mockedListFolders.mockImplementation(() => listPromise as any);
+            mockedListFolders.mockImplementation(() => listPromise);
 
             const cache = new InMemoryFolderCache(config, mockClient, foldersUrl);
             

@@ -1,4 +1,5 @@
 import { ApiError, NetworkError, TimeoutError, ValidationError, assertOkResponse, normalizeLowerTrim } from '../../src/api/helpers';
+import { mockAxiosResponse } from '../types';
 
 describe('Error classes', () => {
     describe('NetworkError', () => {
@@ -59,32 +60,32 @@ describe('Error classes', () => {
 
 describe('assertOkResponse', () => {
     it('should not throw for 200 status', () => {
-        const response = { status: 200, data: {} } as any;
+        const response = mockAxiosResponse(200, {});
         expect(() => assertOkResponse(response, 'test')).not.toThrow();
     });
 
     it('should not throw for 201 status', () => {
-        const response = { status: 201, data: {} } as any;
+        const response = mockAxiosResponse(201, {});
         expect(() => assertOkResponse(response, 'test')).not.toThrow();
     });
 
     it('should throw ApiError for 400 status', () => {
-        const response = { status: 400, data: { error: 'Bad request' } } as any;
+        const response = mockAxiosResponse(400, { error: 'Bad request' });
         expect(() => assertOkResponse(response, 'test')).toThrow(ApiError);
     });
 
     it('should throw ApiError for 500 status', () => {
-        const response = { status: 500, data: { message: 'Server Error' } } as any;
+        const response = mockAxiosResponse(500, { message: 'Server Error' });
         expect(() => assertOkResponse(response, 'test')).toThrow(ApiError);
     });
 
     it('should throw ApiError for 302 redirect', () => {
-        const response = { status: 302, data: '<html>Redirect</html>' } as any;
+        const response = mockAxiosResponse(302, '<html>Redirect</html>');
         expect(() => assertOkResponse(response, 'test')).toThrow(ApiError);
     });
 
     it('should include context label in error', () => {
-        const response = { status: 404, data: {} } as any;
+        const response = mockAxiosResponse(404, {});
         try {
             assertOkResponse(response, 'folders');
             fail('Should have thrown');

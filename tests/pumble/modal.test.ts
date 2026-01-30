@@ -1,5 +1,6 @@
 import { buildShortUrlModal } from '../../src/pumble/modal';
 import { DomainInfo } from '../../src/api/redr/redrApi';
+import { TestModalBlock, findBlock, findBlockByType } from '../types';
 
 // Suppress console.log in tests
 beforeAll(() => {
@@ -10,15 +11,16 @@ afterAll(() => {
     jest.restoreAllMocks();
 });
 
-// Helper to find block by blockId
-const findBlock = (blocks: any[], blockId: string) => blocks.find((b: any) => b.blockId === blockId);
-const findBlockByType = (blocks: any[], type: string) => blocks.find((b: any) => b.type === type);
-
 describe('buildShortUrlModal', () => {
     const mockDomains: DomainInfo[] = [
         { id: 'domain1', url: 'https://rdr.im' },
         { id: 'domain2', url: 'https://rdr.ink' },
     ];
+
+    // Helper to get blocks as TestModalBlock array
+    const getBlocks = (result: ReturnType<typeof buildShortUrlModal>): TestModalBlock[] => {
+        return result.blocks as unknown as TestModalBlock[];
+    };
 
     describe('success view', () => {
         it('should return success view when shortUrl is provided', () => {
@@ -31,8 +33,9 @@ describe('buildShortUrlModal', () => {
 
         it('should display the short URL in success view', () => {
             const result = buildShortUrlModal({ shortUrl: 'https://rdr.im/abc123' });
+            const blocks = getBlocks(result);
 
-            const sectionBlock = findBlockByType(result.blocks as any[], 'section') as any;
+            const sectionBlock = findBlockByType(blocks, 'section');
             expect(sectionBlock?.text?.text).toContain('https://rdr.im/abc123');
         });
     });
@@ -48,8 +51,9 @@ describe('buildShortUrlModal', () => {
 
         it('should include URL input field', () => {
             const result = buildShortUrlModal({});
+            const blocks = getBlocks(result);
 
-            const urlInput = findBlock(result.blocks as any[], 'b_long_url') as any;
+            const urlInput = findBlock(blocks, 'b_long_url');
             expect(urlInput).toBeDefined();
             expect(urlInput?.type).toBe('input');
             expect(urlInput?.label?.text).toBe('URL');
@@ -57,8 +61,9 @@ describe('buildShortUrlModal', () => {
 
         it('should pre-fill URL when initialUrl is provided', () => {
             const result = buildShortUrlModal({ initialUrl: 'https://example.com' });
+            const blocks = getBlocks(result);
 
-            const urlInput = findBlock(result.blocks as any[], 'b_long_url') as any;
+            const urlInput = findBlock(blocks, 'b_long_url');
             expect(urlInput?.element?.initial_value).toBe('https://example.com');
         });
 
@@ -66,43 +71,48 @@ describe('buildShortUrlModal', () => {
             const result = buildShortUrlModal({ 
                 errors: { b_long_url: 'Invalid URL format' }
             });
+            const blocks = getBlocks(result);
 
-            const urlInput = findBlock(result.blocks as any[], 'b_long_url') as any;
+            const urlInput = findBlock(blocks, 'b_long_url');
             expect(urlInput?.validationError).toBe('Invalid URL format');
         });
 
         it('should include domain dropdown when domains provided', () => {
             const result = buildShortUrlModal({ domains: mockDomains });
+            const blocks = getBlocks(result);
 
-            const domainInput = findBlock(result.blocks as any[], 'b_domain') as any;
+            const domainInput = findBlock(blocks, 'b_domain');
             expect(domainInput).toBeDefined();
             expect(domainInput?.label?.text).toBe('Domain');
         });
 
         it('should not include domain dropdown when no domains', () => {
             const result = buildShortUrlModal({ domains: [] });
+            const blocks = getBlocks(result);
 
-            const domainInput = findBlock(result.blocks as any[], 'b_domain');
+            const domainInput = findBlock(blocks, 'b_domain');
             expect(domainInput).toBeUndefined();
         });
 
         it('should format domain options correctly', () => {
             const result = buildShortUrlModal({ domains: mockDomains });
+            const blocks = getBlocks(result);
 
-            const domainInput = findBlock(result.blocks as any[], 'b_domain') as any;
+            const domainInput = findBlock(blocks, 'b_domain');
             const options = domainInput?.element?.options;
 
             expect(options).toHaveLength(2);
-            expect(options[0].text.text).toBe('rdr.im'); // https:// stripped
-            expect(options[0].value).toBe('domain1');
-            expect(options[1].text.text).toBe('rdr.ink');
-            expect(options[1].value).toBe('domain2');
+            expect(options?.[0].text.text).toBe('rdr.im'); // https:// stripped
+            expect(options?.[0].value).toBe('domain1');
+            expect(options?.[1].text.text).toBe('rdr.ink');
+            expect(options?.[1].value).toBe('domain2');
         });
 
         it('should set first domain as initial option by default', () => {
             const result = buildShortUrlModal({ domains: mockDomains });
+            const blocks = getBlocks(result);
 
-            const domainInput = findBlock(result.blocks as any[], 'b_domain') as any;
+            const domainInput = findBlock(blocks, 'b_domain');
             expect(domainInput?.element?.initial_option?.value).toBe('domain1');
         });
 
@@ -111,23 +121,26 @@ describe('buildShortUrlModal', () => {
                 domains: mockDomains, 
                 selectedDomainId: 'domain2' 
             });
+            const blocks = getBlocks(result);
 
-            const domainInput = findBlock(result.blocks as any[], 'b_domain') as any;
+            const domainInput = findBlock(blocks, 'b_domain');
             expect(domainInput?.element?.initial_option?.value).toBe('domain2');
         });
 
         it('should include masking checkbox', () => {
             const result = buildShortUrlModal({});
+            const blocks = getBlocks(result);
 
-            const maskedInput = findBlock(result.blocks as any[], 'b_masked') as any;
+            const maskedInput = findBlock(blocks, 'b_masked');
             expect(maskedInput).toBeDefined();
             expect(maskedInput?.optional).toBe(true);
         });
 
         it('should include expiration date picker', () => {
             const result = buildShortUrlModal({});
+            const blocks = getBlocks(result);
 
-            const expiresInput = findBlock(result.blocks as any[], 'b_expires') as any;
+            const expiresInput = findBlock(blocks, 'b_expires');
             expect(expiresInput).toBeDefined();
             expect(expiresInput?.optional).toBe(true);
             expect(expiresInput?.element?.type).toBe('date_picker');
@@ -135,8 +148,9 @@ describe('buildShortUrlModal', () => {
 
         it('should include password field', () => {
             const result = buildShortUrlModal({});
+            const blocks = getBlocks(result);
 
-            const passwordInput = findBlock(result.blocks as any[], 'b_password') as any;
+            const passwordInput = findBlock(blocks, 'b_password');
             expect(passwordInput).toBeDefined();
             expect(passwordInput?.optional).toBe(true);
         });
@@ -145,15 +159,17 @@ describe('buildShortUrlModal', () => {
             const result = buildShortUrlModal({ 
                 errors: { b_password: 'Password too short' }
             });
+            const blocks = getBlocks(result);
 
-            const passwordInput = findBlock(result.blocks as any[], 'b_password') as any;
+            const passwordInput = findBlock(blocks, 'b_password');
             expect(passwordInput?.validationError).toBe('Password too short');
         });
 
         it('should include submit button', () => {
             const result = buildShortUrlModal({});
+            const blocks = getBlocks(result);
 
-            const actionsBlock = findBlockByType(result.blocks as any[], 'actions') as any;
+            const actionsBlock = findBlockByType(blocks, 'actions');
             const button = actionsBlock?.elements?.[0];
             
             expect(button?.type).toBe('button');
@@ -163,8 +179,9 @@ describe('buildShortUrlModal', () => {
 
         it('should show loading state on button', () => {
             const result = buildShortUrlModal({ loading: true });
+            const blocks = getBlocks(result);
 
-            const actionsBlock = findBlockByType(result.blocks as any[], 'actions') as any;
+            const actionsBlock = findBlockByType(blocks, 'actions');
             const button = actionsBlock?.elements?.[0];
             
             expect(button?.text?.text).toBe('Shortening...');

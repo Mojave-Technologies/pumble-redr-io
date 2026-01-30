@@ -14,7 +14,7 @@ import {
     ViewActionContext,
 } from 'pumble-sdk/lib/core/types/contexts';
 import type { Request, Response } from 'express';
-import { AxiosInstance } from 'axios';
+import { HttpClient } from './api/httpClient';
 import { AppConfig } from './config/env';
 import { FolderCache } from './cache/folderCache';
 import { DomainCache } from './cache/domainCache';
@@ -27,7 +27,7 @@ import { deliver } from './pumble/deliver';
 type ModalFieldErrors = Record<string, string>;
 
 /** Creates the Pumble app with all handlers configured */
-export function createApp(config: AppConfig, folderCache: FolderCache, domainCache: DomainCache, client: AxiosInstance): App {
+export function createApp(config: AppConfig, folderCache: FolderCache, domainCache: DomainCache, client: HttpClient): App {
     const domains = domainCache.getDomains();
     const app: App = {
         tokenStore: new JsonFileTokenStore(config.pumbleTokenStorePath),

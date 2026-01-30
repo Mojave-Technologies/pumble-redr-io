@@ -3,7 +3,7 @@
  * Builds request body and calls REDR API.
  */
 
-import { AxiosInstance } from 'axios';
+import { HttpClient } from '../api/httpClient';
 import { createShortUrl } from '../api/redr/redrApi';
 
 export interface ShortenUrlFields {
@@ -16,7 +16,7 @@ export interface ShortenUrlFields {
 
 /** Creates a short URL with the given options */
 export async function shortenUrl(
-    client: AxiosInstance,
+    client: HttpClient,
     apiUrl: string,
     domainId: string,
     folderId: string,
