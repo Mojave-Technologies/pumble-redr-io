@@ -1,4 +1,4 @@
-# Development Dockerfile
+# Production Dockerfile
 FROM node:20-alpine
 
 WORKDIR /app
@@ -10,12 +10,10 @@ RUN npm install
 # Copy source
 COPY . .
 
-# Copy private config files
-COPY .pumbleapprc .pumbleapprc
+# Copy config files (optional files use wildcards)
 COPY .pumblerc /root/.pumblerc
 COPY .env .env
 COPY tokens.json tokens.json
-COPY .pumble-app-manifest.json .pumble-app-manifest.json
 
 # Build TypeScript
 RUN npm run build
