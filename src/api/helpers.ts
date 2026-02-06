@@ -30,22 +30,35 @@ export class ApiError extends Error {
         public readonly bodySnippet: string
     ) {
         // Try to extract error message from response body
-        const apiMessage = extractApiErrorMessage(bodySnippet);
-        super(apiMessage || `REDR ${contextLabel} HTTP ${status}`);
+        const apiMessage = extractApiErrorMessage(bodySnippet, status);
+        super(apiMessage);
         this.name = 'ApiError';
         this.apiMessage = apiMessage;
     }
 }
 
 /** Extracts user-friendly error message from API response body */
-function extractApiErrorMessage(bodySnippet: string): string | undefined {
+function extractApiErrorMessage(bodySnippet: string, status: number): string {
     try {
         const parsed = JSON.parse(bodySnippet);
         // REDR API returns { error: "message" } or { message: "message" }
-        return parsed?.error || parsed?.message || undefined;
+        if (parsed?.error) return parsed.error;
+        if (parsed?.message) return parsed.message;
     } catch {
-        return undefined;
+        // Body is not JSON (e.g. HTML error page)
     }
+    
+    // Fallback to user-friendly messages based on status code
+    if (status >= 500) {
+        return 'REDR service is temporarily unavailable. Please try again later.';
+    }
+    if (status === 401 || status === 403) {
+        return 'REDR authentication failed. Please contact support.';
+    }
+    if (status === 429) {
+        return 'Too many requests. Please wait a moment and try again.';
+    }
+    return `REDR error (HTTP ${status}). Please try again.`;
 }
 
 /** Response validation error (missing required fields, invalid format) */
