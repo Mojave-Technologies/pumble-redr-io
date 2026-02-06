@@ -261,9 +261,12 @@ export function createApp(config: AppConfig, folderCache: FolderCache, domainCac
 }
 
 function getErrorMessage(error: unknown): string {
-    if (error instanceof Error) return error.message;
+    if (error instanceof Error) {
+        // ApiError already contains user-friendly message from REDR API
+        return error.message;
+    }
     if (typeof error === 'string') return error;
-    return 'unknown error';
+    return 'Unknown error occurred.';
 }
 
 function validateShortUrlModalState(state: unknown): {

@@ -22,9 +22,29 @@ export class TimeoutError extends NetworkError {
 
 /** HTTP error with non-2xx status code */
 export class ApiError extends Error {
-    constructor(public readonly status: number, public readonly contextLabel: string, public readonly bodySnippet: string) {
-        super(`REDR ${contextLabel} HTTP ${status}`);
+    public readonly apiMessage?: string;
+
+    constructor(
+        public readonly status: number,
+        public readonly contextLabel: string,
+        public readonly bodySnippet: string
+    ) {
+        // Try to extract error message from response body
+        const apiMessage = extractApiErrorMessage(bodySnippet);
+        super(apiMessage || `REDR ${contextLabel} HTTP ${status}`);
         this.name = 'ApiError';
+        this.apiMessage = apiMessage;
+    }
+}
+
+/** Extracts user-friendly error message from API response body */
+function extractApiErrorMessage(bodySnippet: string): string | undefined {
+    try {
+        const parsed = JSON.parse(bodySnippet);
+        // REDR API returns { error: "message" } or { message: "message" }
+        return parsed?.error || parsed?.message || undefined;
+    } catch {
+        return undefined;
     }
 }
 
