@@ -1,5 +1,5 @@
 {
-    "name": "pumble_redr_io",
+    "name": "pumble_redr",
     "displayName": "REDR",
     "bot": true,
     "botTitle": "Shorten links via REDR.io - URL Shortener",
