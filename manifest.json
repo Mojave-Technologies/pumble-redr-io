@@ -6,7 +6,7 @@
     "socketMode": false,
     "scopes": {
         "botScopes": ["messages:read", "messages:write"],
-        "userScopes": ["messages:read", "messages:write"]
+        "userScopes": ["messages:read"]
     },
     "eventSubscriptions": {
         "url": "/hook",

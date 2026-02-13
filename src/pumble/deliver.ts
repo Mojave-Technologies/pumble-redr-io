@@ -11,16 +11,13 @@ import {
 
 type Ctx = SlashCommandContext | MessageShortcutContext | ViewActionContext;
 
-/** Gets the best available API client (bot preferred, user fallback) */
+/** Gets bot API client for sending messages */
 async function resolveClient(ctx: Ctx, requestId?: string) {
     const userId = ctx.payload.userId;
-    const bot = await ctx.getBotClient();
-    const user = userId ? await ctx.getUserClient?.(userId) : undefined;
-
-    const client = bot || user;
+    const client = await ctx.getBotClient();
     if (!client) {
-        console.error('deliver: no bot/user client available', { requestId, userId });
-        throw new Error('No bot or user client available');
+        console.error('deliver: no bot client available', { requestId, userId });
+        throw new Error('No bot client available');
     }
 
     return { client, userId };
