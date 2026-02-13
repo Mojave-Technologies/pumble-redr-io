@@ -224,6 +224,8 @@ export function createApp(config: AppConfig, folderCache: FolderCache, domainCac
                     const raw = extractFirstUrl(text);
                     if (!raw) return;
 
+                    // Auto-replies are disabled for now. Keep original flow commented for quick re-enable.
+                    /*
                     let longUrl: string;
                     try {
                         longUrl = normalizeHttpUrl(raw);
@@ -244,6 +246,8 @@ export function createApp(config: AppConfig, folderCache: FolderCache, domainCac
                     } catch (error) {
                         console.error('Auto-shorten error:', error);
                     }
+                    */
+                    return;
                 },
             },
         ],
